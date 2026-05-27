@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "name": "ghl-form-css-reference",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "last_updated": "2026-05-28",
   "scope": "GoHighLevel / HighLevel / LeadConnector inline form embeds served via form_embed.js. Selectors apply inside the rendered iframe document. Survey forms have additional selectors marked accordingly.",
   "stability_warning": "There is no official CSS-class API from HighLevel. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. The `data-q` attribute is the single most stable hook because it mirrors the field's internal name set in the form builder; it survives most refactors that break class-name or :nth-child selectors.",
@@ -14,6 +14,14 @@
       "type": "community-repo",
       "last_verified": "2026-05-28",
       "notes": "Most actively maintained community reference for inline GHL form CSS. Sibling repo: krishnalewin-hash/airport-transfer-form. Battle-tested against the live LeadConnector iframe DOM."
+    },
+    {
+      "id": "resonant-studios-coordinator-combo",
+      "name": "Resonant Studios — Coordinator Combo Lead Magnet (live form #HT93KLrv082pr6Wvq9rL)",
+      "url": "https://github.com/teamos-ai/resonant-studios-website/blob/master/forms/ghl-design-system.css",
+      "type": "own-implementation",
+      "last_verified": "2026-05-28",
+      "notes": "Empirical findings from styling a live newer-builder GHL form. Confirms that the v1 .ghl-btn.ghl-submit-btn selector did not match this form's button, and that GHL exposes its theme colour via CSS custom properties on :root that must be hijacked to win the cascade."
     },
     {
       "id": "simple10-gist",
@@ -60,7 +68,8 @@
     "links": "Anchor tags inside form copy (terms-and-conditions, privacy links).",
     "survey": "Selectors specific to multi-step survey/quiz forms.",
     "host-page": "Selectors on the parent page where the iframe is embedded.",
-    "thank-you": "Post-submit confirmation state."
+    "thank-you": "Post-submit confirmation state.",
+    "theme-variables": "GHL's own CSS custom properties — override these at :root to re-skin the form's default theme colour at the source instead of fighting it per-element."
   },
   "selectors": [
     {
@@ -217,6 +226,33 @@
       "notes": null
     },
     {
+      "id": "submit-button-broad",
+      "selector": "body button, body button[type=\"submit\"], body input[type=\"submit\"], body .ghl-btn, body .ghl-submit-btn, body button[class*=\"submit\"], body button[class*=\"primary\"], body button[class*=\"btn\"], body [role=\"button\"], body form button",
+      "category": "submit",
+      "purpose": "Broadest-possible submit-button target. Use when the form is rendered by the newer GHL form builder and the standard .ghl-btn.ghl-submit-btn class doesn't match. Empirically required for forms where the v1 selector leaves the button styled in GHL's default theme blue.",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": "Body-prefix raises specificity over GHL's stylesheet. Also explicitly override background-color AND background-image so the gradient and the flat-colour fallback both get blanked."
+    },
+    {
+      "id": "submit-button-children",
+      "selector": "body button > *, body button[type=\"submit\"] > *, body .ghl-btn > *, body .ghl-submit-btn > *",
+      "category": "submit",
+      "purpose": "Some GHL buttons wrap the label in a child <span> that carries its own colour, which beats the parent button's colour. Force every descendant to inherit colour + transparent background.",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": null
+    },
+    {
+      "id": "theme-variables",
+      "selector": ":root, html, body, .hl-app { --primary, --primary-color, --primary-hover, --ghl-primary, --ghl-primary-color, --brand-primary, --brand-color, --theme-color, --theme-primary, --main-color, --accent-color, --link-color, --form-primary, --form-button-color, --form-button-bg-color, --button-color, --button-bg-color, --button-text-color }",
+      "category": "theme-variables",
+      "purpose": "GHL's form builder applies the form-level theme colour through CSS custom properties on :root. Names vary by builder version. Hijack all of them at :root with !important to re-skin the form's default theme blue at the source — much more reliable than fighting each element's `color: var(--primary)` rule downstream.",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": "Not all of these variables will exist on any given form — defining a variable that isn't referenced is a no-op, so the over-coverage is safe."
+    },
+    {
       "id": "terms-conditions",
       "selector": ".terms-conditions, .terms-and-conditions, .consent-text, .checkbox-text",
       "category": "field-types",
@@ -313,6 +349,16 @@
       "pattern": "Omitting !important on overrides",
       "why_to_avoid": "GHL's own stylesheet loads after the Custom CSS panel. Without !important, almost every rule loses the cascade.",
       "use_instead": "Use !important on every override rule. Standard practice for these embeds."
+    },
+    {
+      "pattern": "Only targeting .ghl-btn.ghl-submit-btn for the submit button",
+      "why_to_avoid": "Newer-version forms (2026+) often render submit buttons without the .ghl-btn / .ghl-submit-btn classes. The button keeps GHL's default theme blue because the override never matches.",
+      "use_instead": "Use the broad submit-button-broad selector + the theme-variables :root override together. Belt-and-braces."
+    },
+    {
+      "pattern": "Overriding `background` but not `background-color` or `background-image`",
+      "why_to_avoid": "GHL applies the theme colour as `background-color` and sometimes adds a `background-image` gradient. The shorthand `background` should reset both, but inline `background-image` styles can survive — set them explicitly to `none`.",
+      "use_instead": "Set all three: background, background-color, AND background-image."
     }
   ]
 }
