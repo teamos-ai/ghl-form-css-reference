@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "name": "ghl-form-css-reference",
+  "version": "1.0.0",
+  "last_updated": "2026-05-28",
+  "scope": "GoHighLevel / HighLevel / LeadConnector inline form embeds served via form_embed.js. Selectors apply inside the rendered iframe document. Survey forms have additional selectors marked accordingly.",
+  "stability_warning": "There is no official CSS-class API from HighLevel. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. The `data-q` attribute is the single most stable hook because it mirrors the field's internal name set in the form builder; it survives most refactors that break class-name or :nth-child selectors.",
+  "how_to_use": "Look up a target by `category` + `purpose`. Each entry has a `confidence` field — `confirmed` means at least one community reference has it working in production; `inferred` means it's a reasonable guess that needs DevTools verification on a live form. Prefer `data-q` field targeting over positional selectors.",
+  "sources": [
+    {
+      "id": "tourism-ui-kit",
+      "name": "krishnalewin-hash/tourism-ui-kit",
+      "url": "https://github.com/krishnalewin-hash/tourism-ui-kit",
+      "type": "community-repo",
+      "last_verified": "2026-05-28",
+      "notes": "Most actively maintained community reference for inline GHL form CSS. Sibling repo: krishnalewin-hash/airport-transfer-form. Battle-tested against the live LeadConnector iframe DOM."
+    },
+    {
+      "id": "simple10-gist",
+      "name": "simple10 GHL survey CSS gist",
+      "url": "https://gist.github.com/simple10/0ffbc5a8294efd3d1d91e855b3515ff7",
+      "type": "community-gist",
+      "last_verified": "2026-05-28",
+      "notes": "Survey-specific (multi-step). Confirms the `_builder-form` id, the `.ghl-footer` + `.ghl-progress-bar*` family, and the `.hl-app` namespace."
+    },
+    {
+      "id": "official-help-doc",
+      "name": "Apply Custom CSS to Forms/Surveys/Quizzes",
+      "url": "https://help.gohighlevel.com/support/solutions/articles/155000006727-how-to-add-custom-css-to-forms-surveys-and-quizzes-",
+      "type": "official-docs",
+      "last_verified": "2026-05-28",
+      "notes": "Officially confirms only generic selectors (`input`, `textarea`, `button[type=\"submit\"]`, `label`, `.hl-error`, `.error-message`). Explicitly tells users to use right-click → Inspect for anything specific."
+    },
+    {
+      "id": "ideas-board-classes",
+      "name": "HighLevel Ideas — custom CSS classes on form fields",
+      "url": "https://ideas.gohighlevel.com/forms/p/custom-css-classes-on-form-fields",
+      "type": "feature-request",
+      "last_verified": "2026-05-28",
+      "notes": "Open feature request for user-assignable classes on form fields. Years-old, never shipped. Confirms there is no per-field class API today."
+    },
+    {
+      "id": "squarespace-forum-buttons",
+      "name": "Squarespace forum — GHL form button CSS",
+      "url": "https://forum.squarespace.com/topic/259578-gohighlevel-form-button-css/",
+      "type": "community-forum",
+      "last_verified": "2026-05-28",
+      "notes": "Anecdotal colour overrides on submit buttons. No new selectors beyond what's in tourism-ui-kit / simple10."
+    }
+  ],
+  "categories": {
+    "structure": "The form's root element + namespace wrappers.",
+    "field-wrapper": "Containers that wrap a single field (label + input + error).",
+    "field-targeting": "How to target a specific field by name. Use `data-q` whenever possible.",
+    "field-input": "The input/select/textarea element itself.",
+    "field-types": "Selectors that vary by field type (checkbox, radio, dropdown, etc.).",
+    "labels": "Field labels and the required-asterisk markup.",
+    "validation": "Error states on fields + error message text.",
+    "submit": "The submit button and its container.",
+    "links": "Anchor tags inside form copy (terms-and-conditions, privacy links).",
+    "survey": "Selectors specific to multi-step survey/quiz forms.",
+    "host-page": "Selectors on the parent page where the iframe is embedded.",
+    "thank-you": "Post-submit confirmation state."
+  },
+  "selectors": [
+    {
+      "id": "form-root",
+      "selector": "form#_builder-form",
+      "category": "structure",
+      "purpose": "Root <form> element inside the iframe document. Use this as the scoping root for all form-level overrides.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit", "simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "app-namespace",
+      "selector": ".hl-app",
+      "category": "structure",
+      "purpose": "Top-level HighLevel app namespace wrapper. Useful for high-specificity overrides like `.hl-app .form-control`.",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc", "simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "question-container",
+      "selector": ".ghl-question",
+      "category": "field-wrapper",
+      "purpose": "Container that wraps a single question (label + input + helper text + error).",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": null
+    },
+    {
+      "id": "fields-row",
+      "selector": ".ghl-question .fields-container.row",
+      "category": "field-wrapper",
+      "purpose": "Bootstrap-style row that contains one or more field wrappers — controls side-by-side field layouts.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": null
+    },
+    {
+      "id": "field-wrapper",
+      "selector": ".form-field-wrapper",
+      "category": "field-wrapper",
+      "purpose": "Per-field wrapper. Often combined with a Bootstrap col class (e.g. `.col-12.form-field-wrapper` for full-width, `.col-6.form-field-wrapper` for half).",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": null
+    },
+    {
+      "id": "field-by-data-q",
+      "selector": "input[data-q=\"<field_key>\"], select[data-q=\"<field_key>\"], textarea[data-q=\"<field_key>\"]",
+      "category": "field-targeting",
+      "purpose": "Target a specific field by its internal name. MOST STABLE per-field hook. Replace <field_key> with the field's internal name set in the form builder.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": "Prefer this over :nth-child or positional selectors. data-q mirrors the form builder's internal key and survives most DOM refactors."
+    },
+    {
+      "id": "field-wrapper-by-data-q",
+      "selector": ".form-field-wrapper:has(input[data-q=\"<field_key>\"])",
+      "category": "field-targeting",
+      "purpose": "Target the wrapper of a specific field by its internal name. Useful for hiding rows (hidden fields, conditional fields).",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": "Used in tourism-ui-kit to hide rows containing hidden inputs. Requires :has() — supported in all modern browsers as of 2024."
+    },
+    {
+      "id": "form-control",
+      "selector": ".form-control",
+      "category": "field-input",
+      "purpose": "Bootstrap-ish base class on most inputs/selects/textareas. Useful for general typographic + border overrides.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit", "simple10-gist"],
+      "notes": "Also addressable via `.hl-app .form-control` for higher specificity."
+    },
+    {
+      "id": "vue-dropdown",
+      "selector": ".custom-vue-select.form-control",
+      "category": "field-types",
+      "purpose": "Vue-powered custom dropdown (used for select fields with rich options).",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "input-text",
+      "selector": "input[type=\"text\"], input[type=\"email\"], input[type=\"tel\"], input[type=\"number\"], input[type=\"url\"], input[type=\"password\"], input[type=\"date\"], input[type=\"search\"]",
+      "category": "field-input",
+      "purpose": "Standard text-style HTML inputs. Group target for type/colour/border/radius overrides.",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "input-checkbox",
+      "selector": "input[type=\"checkbox\"]",
+      "category": "field-types",
+      "purpose": "Native checkbox. Use `accent-color` to brand it without rebuilding the control.",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "input-radio",
+      "selector": "input[type=\"radio\"]",
+      "category": "field-types",
+      "purpose": "Native radio. Use `accent-color` to brand it.",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "label",
+      "selector": "label",
+      "category": "labels",
+      "purpose": "Field label. Sits above the input by default.",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "required-asterisk",
+      "selector": "label sup, label .required, .required-asterisk",
+      "category": "labels",
+      "purpose": "Required-field asterisk. Exact markup varies — most common is `<sup>*` appended to the label, but `<span class=\"required\">` is also seen.",
+      "confidence": "inferred",
+      "sources": [],
+      "notes": "Not confirmed by any community reference. Verify in DevTools when building a new form. The default GHL styling is a red `*` next to the label text."
+    },
+    {
+      "id": "field-error-state",
+      "selector": ".input-error, [aria-invalid=\"true\"]",
+      "category": "validation",
+      "purpose": "Error state class added to invalid inputs.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": null
+    },
+    {
+      "id": "field-error-message",
+      "selector": ".field-error, .form-builder--item .error, .hl-error, .error-message",
+      "category": "validation",
+      "purpose": "Error message text that appears below an invalid field.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit", "official-help-doc"],
+      "notes": "Multiple class names seen across versions — target all four for safety."
+    },
+    {
+      "id": "submit-button",
+      "selector": ".ghl-btn.ghl-submit-btn, button[type=\"submit\"]",
+      "category": "submit",
+      "purpose": "The form's submit button. `.ghl-btn.ghl-submit-btn` is the official class pair; `button[type=\"submit\"]` is the safe fallback.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit", "official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "terms-conditions",
+      "selector": ".terms-conditions, .terms-and-conditions, .consent-text, .checkbox-text",
+      "category": "field-types",
+      "purpose": "Terms-and-conditions consent block (checkbox + legal text + link). Exact class varies by GHL version.",
+      "confidence": "inferred",
+      "sources": [],
+      "notes": "Not confirmed in either community reference. Inspect when building. The structure is typically a `<label>` containing a checkbox + text + anchor."
+    },
+    {
+      "id": "form-link",
+      "selector": "form a",
+      "category": "links",
+      "purpose": "Anchor tags inside the form (terms-and-conditions, privacy policy, etc).",
+      "confidence": "confirmed",
+      "sources": ["official-help-doc"],
+      "notes": null
+    },
+    {
+      "id": "survey-question-set",
+      "selector": ".ghl-question-set.ghl-ques-wrap-big",
+      "category": "survey",
+      "purpose": "Survey question set wrapper (multi-step forms only).",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "survey-footer",
+      "selector": ".ghl-footer, .ghl-footer-preview, .ghl-button-bar, .ghl-btn-align",
+      "category": "survey",
+      "purpose": "Survey footer area containing the navigation buttons.",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "survey-next-button",
+      "selector": ".ghl-btn.ghl-footer-next, #nextButton, .ghl-next-button",
+      "category": "survey",
+      "purpose": "Survey 'Next' button (advances to the next step).",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "survey-back-button",
+      "selector": ".ghl-back-button",
+      "category": "survey",
+      "purpose": "Survey 'Back' button (returns to the previous step).",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "survey-progress-bar",
+      "selector": ".ghl-progress-bar, .ghl-progress-bar-text, .ghl-progress-bar-background, .hl-progress .fill",
+      "category": "survey",
+      "purpose": "Survey progress bar (track + fill + label text).",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "thank-you",
+      "selector": "#_builder-form .thank-you-message",
+      "category": "thank-you",
+      "purpose": "Post-submission confirmation screen.",
+      "confidence": "confirmed",
+      "sources": ["simple10-gist"],
+      "notes": null
+    },
+    {
+      "id": "host-iframe-placeholder",
+      "selector": "div[id^=\"inline-\"], iframe[id^=\"inline-\"]",
+      "category": "host-page",
+      "purpose": "The placeholder div + the actual iframe written by form_embed.js. Lives on the PARENT page, not inside the iframe. Use to size or constrain the embed externally.",
+      "confidence": "confirmed",
+      "sources": ["tourism-ui-kit"],
+      "notes": "Placeholder id pattern: `inline-<formId>`. Iframe id is appended by the loader."
+    }
+  ],
+  "anti_patterns": [
+    {
+      "pattern": ":nth-child(N)",
+      "why_to_avoid": "Order-dependent. Breaks the moment a field is added, removed, or reordered in the form builder. The simple10 gist uses this and explicitly marks it as brittle.",
+      "use_instead": "input[data-q=\"<field_key>\"] or .form-field-wrapper:has(input[data-q=\"<field_key>\"])"
+    },
+    {
+      "pattern": "Targeting field types by guessing the wrapper class",
+      "why_to_avoid": "GHL has no per-type wrapper class — the wrapper is always `.form-field-wrapper` regardless of whether the input is text, checkbox, radio, signature, or file.",
+      "use_instead": "Match on the inner input's type attribute or its data-q name."
+    },
+    {
+      "pattern": "Omitting !important on overrides",
+      "why_to_avoid": "GHL's own stylesheet loads after the Custom CSS panel. Without !important, almost every rule loses the cascade.",
+      "use_instead": "Use !important on every override rule. Standard practice for these embeds."
+    }
+  ]
+}
