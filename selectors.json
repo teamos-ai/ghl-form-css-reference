@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "name": "ghl-form-css-reference",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "last_updated": "2026-05-28",
   "scope": "GoHighLevel / HighLevel / LeadConnector inline form embeds served via form_embed.js. Selectors apply inside the rendered iframe document. Survey forms have additional selectors marked accordingly.",
   "stability_warning": "There is no official CSS-class API from HighLevel. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. The `data-q` attribute is the single most stable hook because it mirrors the field's internal name set in the form builder; it survives most refactors that break class-name or :nth-child selectors.",
@@ -254,12 +254,30 @@
     },
     {
       "id": "terms-conditions",
-      "selector": ".terms-conditions, .terms-and-conditions, .consent-text, .checkbox-text",
+      "selector": ".terms-conditions, .terms-and-conditions, .consent-text, .checkbox-text, .form-field-wrapper:has(input[type=\"checkbox\"]), .ghl-question:has(input[type=\"checkbox\"]), label:has(input[type=\"checkbox\"])",
       "category": "field-types",
-      "purpose": "Terms-and-conditions consent block (checkbox + legal text + link). Exact class varies by GHL version.",
-      "confidence": "inferred",
-      "sources": [],
-      "notes": "Not confirmed in either community reference. Inspect when building. The structure is typically a `<label>` containing a checkbox + text + anchor."
+      "purpose": "Terms-and-conditions consent block wrapper (checkbox + legal text + link). Class names vary across builder versions, so the `:has(input[type=\"checkbox\"])` form is the most reliable hook.",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": "Empirically verified against a live form. The :has() form catches every variant of the wrapper regardless of class."
+    },
+    {
+      "id": "terms-conditions-descendants",
+      "selector": ".terms-conditions *, .terms-and-conditions *, .consent-text *, label:has(input[type=\"checkbox\"]) *, .form-field-wrapper:has(input[type=\"checkbox\"]) *:not(input):not(svg):not(a), input[type=\"checkbox\"] ~ label, input[type=\"checkbox\"] ~ span, input[type=\"checkbox\"] ~ div, input[type=\"checkbox\"] + span, input[type=\"checkbox\"] + div",
+      "category": "field-types",
+      "purpose": "Descendant text nodes inside a terms-and-conditions block. GHL sets `color` directly on the inner <span>/<div>, which beats inheritance from the wrapper — so styling the wrapper alone leaves the text rendering in whatever GHL's default is (usually ink-faint, which is invisible on a dark surface).",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": "Pair this with a wrapper-level rule. The :not(a) escape preserves link colour inside the block — re-apply the link rule separately afterwards."
+    },
+    {
+      "id": "placeholders-vendor-prefixed",
+      "selector": "input::placeholder, textarea::placeholder, input::-webkit-input-placeholder, textarea::-webkit-input-placeholder, input::-moz-placeholder, textarea::-moz-placeholder, input:-ms-input-placeholder, textarea:-ms-input-placeholder, input::-ms-input-placeholder, textarea::-ms-input-placeholder",
+      "category": "field-input",
+      "purpose": "Placeholder text colour. Vendor-prefixed selectors are required because GHL's stylesheet uses `color: var(--primary)` on placeholders — if you hijack --primary to your brand colour at :root (which you should), placeholders inherit the brand colour and stop reading as 'helper text'. Explicit overrides with all five prefixes force them back to ink-soft / muted grey.",
+      "confidence": "confirmed",
+      "sources": ["resonant-studios-coordinator-combo"],
+      "notes": "Also set `-webkit-text-fill-color` on the same selectors — some webkit builds use the fill colour over the regular colour for placeholder rendering."
     },
     {
       "id": "form-link",
@@ -359,6 +377,16 @@
       "pattern": "Overriding `background` but not `background-color` or `background-image`",
       "why_to_avoid": "GHL applies the theme colour as `background-color` and sometimes adds a `background-image` gradient. The shorthand `background` should reset both, but inline `background-image` styles can survive — set them explicitly to `none`.",
       "use_instead": "Set all three: background, background-color, AND background-image."
+    },
+    {
+      "pattern": "Styling only the wrapper for a multi-text block (terms-and-conditions, helper text)",
+      "why_to_avoid": "CSS `color` is inheritable, but GHL frequently sets `color` directly on the inner <span>/<div>, which beats inheritance from the wrapper. Styling only the wrapper leaves the inner text rendering in GHL's default (often ink-faint, invisible on dark surfaces).",
+      "use_instead": "Style the wrapper AND every descendant: `.wrapper *:not(input):not(svg):not(a) { color: ... }`. Then re-apply link colour separately."
+    },
+    {
+      "pattern": "Forgetting vendor-prefixed placeholder selectors",
+      "why_to_avoid": "If you hijack --primary at :root (to override the theme button colour), placeholders inherit it via GHL's `color: var(--primary)` rule on ::placeholder. Without vendor-prefixed overrides (-webkit, -moz, -ms), placeholders render in your brand colour and stop reading as helper text.",
+      "use_instead": "Set all five: ::placeholder, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder, ::-ms-input-placeholder. Also -webkit-text-fill-color for webkit edge cases."
     }
   ]
 }
