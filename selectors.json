@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "name": "ghl-form-css-reference",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "last_updated": "2026-05-28",
-  "scope": "GoHighLevel / HighLevel / LeadConnector inline form embeds served via form_embed.js. Selectors apply inside the rendered iframe document. Survey forms have additional selectors marked accordingly.",
-  "stability_warning": "There is no official CSS-class API from HighLevel. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. The `data-q` attribute is the single most stable hook because it mirrors the field's internal name set in the form builder; it survives most refactors that break class-name or :nth-child selectors.",
-  "how_to_use": "Look up a target by `category` + `purpose`. Each entry has a `confidence` field — `confirmed` means at least one community reference has it working in production; `inferred` means it's a reasonable guess that needs DevTools verification on a live form. Prefer `data-q` field targeting over positional selectors.",
+  "scope": "GoHighLevel / HighLevel / LeadConnector inline widgets served via form_embed.js. Covers both FORM widgets (link.<sub>.com/widget/form/<id>) and CALENDAR widgets (link.<sub>.com/widget/booking/<id>). Both render inside an iframe and both expose a Custom CSS panel in the GHL builder. Selectors apply inside the rendered iframe document. Categories prefixed with `calendar-` apply only to calendar widgets; all others are form-widget selectors. The calendar's form-step screen reuses the form widget DOM, so form selectors also apply there.",
+  "stability_warning": "There is no official CSS-class API from HighLevel for either widget type. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. For FORM widgets, the `data-q` attribute is the most stable per-field hook. For CALENDAR widgets, ARIA attributes (aria-selected, aria-pressed, aria-disabled) and substring class matching (`[class*=\"day-cell\"]`) are the most stable hooks because GHL renames calendar classes between versions more aggressively than form classes.",
+  "how_to_use": "Look up a target by `category` + `purpose`. Each entry has a `confidence` field — `confirmed` means at least one community reference has it working in production; `inferred` means it's a reasonable guess that needs DevTools verification on a live widget. For forms, prefer `data-q` field targeting over positional selectors. For calendars, prefer ARIA attributes + substring class matching over exact class names.",
   "sources": [
     {
       "id": "tourism-ui-kit",
@@ -54,6 +54,30 @@
       "type": "community-forum",
       "last_verified": "2026-05-28",
       "notes": "Anecdotal colour overrides on submit buttons. No new selectors beyond what's in tourism-ui-kit / simple10."
+    },
+    {
+      "id": "erobrien-mwcv3-calendar",
+      "name": "erobrien/mwcv3 — ghl-calendar-overrides.css",
+      "url": "https://github.com/erobrien/mwcv3/blob/main/src/styles/ghl-calendar-overrides.css",
+      "type": "community-repo",
+      "last_verified": "2026-05-28",
+      "notes": "Best community reference for GHL CALENDAR widget custom CSS. Header comment warns 'GHL renames classes between versions' and uses substring matching (`[class*=\"day-cell\"]`) rather than exact class names. Calendar-equivalent of tourism-ui-kit's role for forms."
+    },
+    {
+      "id": "official-help-calendar",
+      "name": "Calendar Widget Customization — HighLevel Support",
+      "url": "https://help.gohighlevel.com/support/solutions/articles/155000001529-calendar-widget-customization",
+      "type": "official-docs",
+      "last_verified": "2026-05-28",
+      "notes": "Confirms Custom CSS panel exists for Neo-style calendars. Says 'Primary Color impacts buttons, dates, time slots' (implying calendar consumes the same --primary root variable as forms). Lists zero specific selectors. Punts to DevTools."
+    },
+    {
+      "id": "ideas-board-calendar",
+      "name": "HighLevel Ideas — Add Custom CSS styling to Calendars",
+      "url": "https://ideas.gohighlevel.com/scheduling-calendar/p/add-custom-css-styling-to-calendars",
+      "type": "feature-request",
+      "last_verified": "2026-05-28",
+      "notes": "Confirms there is no first-class CSS class API for calendar styling — the Custom CSS panel is currently the only path."
     }
   ],
   "categories": {
@@ -69,7 +93,15 @@
     "survey": "Selectors specific to multi-step survey/quiz forms.",
     "host-page": "Selectors on the parent page where the iframe is embedded.",
     "thank-you": "Post-submit confirmation state.",
-    "theme-variables": "GHL's own CSS custom properties — override these at :root to re-skin the form's default theme colour at the source instead of fighting it per-element."
+    "theme-variables": "GHL's own CSS custom properties — override these at :root to re-skin the form's default theme colour at the source instead of fighting it per-element.",
+    "calendar-structure": "CALENDAR widget — root container + namespace.",
+    "calendar-month-grid": "CALENDAR widget — month header, day-of-week column headers, navigation arrows.",
+    "calendar-date-tile": "CALENDAR widget — individual date cells + their states (selected, today, disabled, outside-current-month).",
+    "calendar-time-slot": "CALENDAR widget — time-slot buttons + their states (selected, disabled).",
+    "calendar-timezone": "CALENDAR widget — timezone picker / dropdown.",
+    "calendar-cta": "CALENDAR widget — confirm/book/continue button that advances to the next step.",
+    "calendar-form-step": "CALENDAR widget — the form-fields screen on the calendar's final step. Reuses the form widget DOM; the standard form selectors (form#_builder-form, .ghl-question, .form-field-wrapper, data-q) apply here.",
+    "calendar-confirmation": "CALENDAR widget — post-booking confirmation screen."
   },
   "selectors": [
     {
@@ -350,6 +382,150 @@
       "confidence": "confirmed",
       "sources": ["tourism-ui-kit"],
       "notes": "Placeholder id pattern: `inline-<formId>`. Iframe id is appended by the loader."
+    },
+    {
+      "id": "calendar-root",
+      "selector": ".calendar-container, [class*=\"calendar-widget\"], [class*=\"calendar-container\"], .neo-calendar",
+      "category": "calendar-structure",
+      "purpose": "Root container for the GHL calendar widget. Multiple selectors because GHL renames the wrapper class between Classic and Neo calendar styles and across builder versions.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "Use substring matching as primary. erobrien's file uses all three of these as fallbacks."
+    },
+    {
+      "id": "calendar-month-header",
+      "selector": "[class*=\"month-header\"], [class*=\"month-label\"], [class*=\"calendar\"] h1, [class*=\"calendar\"] h2",
+      "category": "calendar-month-grid",
+      "purpose": "The 'November 2026' style header that labels the current month/year.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-nav-arrows",
+      "selector": "button[class*=\"nav\"], button[class*=\"arrow\"], button[class*=\"prev\"], button[class*=\"next\"]",
+      "category": "calendar-month-grid",
+      "purpose": "Previous / next month navigation buttons.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "Substring matching survives GHL's version churn better than exact classes."
+    },
+    {
+      "id": "calendar-weekday-headers",
+      "selector": "[class*=\"weekday\"], [class*=\"day-name\"], [class*=\"dow\"]",
+      "category": "calendar-month-grid",
+      "purpose": "The Mon/Tue/Wed/... column headers above the date grid.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-date-tile",
+      "selector": "[class*=\"day-cell\"], [class*=\"date-cell\"], button[class*=\"day\"]:not([class*=\"weekday\"])",
+      "category": "calendar-date-tile",
+      "purpose": "Individual date tile in the month grid. Excludes weekday-header cells via :not().",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "The :not([class*=\"weekday\"]) guard prevents this rule from accidentally hitting the column headers."
+    },
+    {
+      "id": "calendar-date-selected",
+      "selector": "[class*=\"day-cell\"][aria-pressed=\"true\"], [class*=\"day-cell\"][aria-selected=\"true\"], [class*=\"date-cell\"][aria-pressed=\"true\"], button[class*=\"day\"][aria-pressed=\"true\"], [class*=\"day-cell\"][class*=\"selected\"]",
+      "category": "calendar-date-tile",
+      "purpose": "Currently-selected date. ARIA attributes are the MOST stable hook here — they're semantic and survive GHL's class renames.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "Prefer aria-pressed=\"true\" and aria-selected=\"true\" over class-based selectors. The [class*=\"selected\"] is a class-name fallback in case ARIA isn't applied."
+    },
+    {
+      "id": "calendar-date-today",
+      "selector": "[class*=\"day-cell\"][class*=\"today\"], [class*=\"date-cell\"][class*=\"today\"], button[class*=\"day\"][class*=\"today\"]:not([aria-pressed=\"true\"])",
+      "category": "calendar-date-tile",
+      "purpose": "Today's date when it's NOT also selected. The :not() guard prevents this rule from overriding the selected-state rule when today is the selected date.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-date-disabled",
+      "selector": "[class*=\"day-cell\"][disabled], [class*=\"day-cell\"][aria-disabled=\"true\"], [class*=\"day-cell\"][class*=\"disabled\"], button[class*=\"day\"][disabled]",
+      "category": "calendar-date-tile",
+      "purpose": "Date that's not bookable (past, fully booked, outside availability window).",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "aria-disabled=\"true\" is the most stable signal — semantic and version-resistant."
+    },
+    {
+      "id": "calendar-date-outside-month",
+      "selector": "[class*=\"day-cell\"][class*=\"other\"], [class*=\"day-cell\"][class*=\"outside\"], [class*=\"day-cell\"][class*=\"not-current-month\"]",
+      "category": "calendar-date-tile",
+      "purpose": "Greyed-out 'spillover' date from the previous or next month, when the grid shows 6 rows.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "Class names vary heavily — three different names seen across versions."
+    },
+    {
+      "id": "calendar-time-slot",
+      "selector": "button[class*=\"slot\"], button[class*=\"time-slot\"], [class*=\"time-slot\"] button",
+      "category": "calendar-time-slot",
+      "purpose": "Individual time-slot button shown after a date is selected.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-time-slot-selected",
+      "selector": "button[class*=\"slot\"][aria-pressed=\"true\"], button[class*=\"slot\"][aria-selected=\"true\"], button[class*=\"slot\"][class*=\"selected\"], button[class*=\"slot\"][class*=\"active\"]",
+      "category": "calendar-time-slot",
+      "purpose": "Currently-selected time slot. ARIA attributes preferred.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-time-slot-disabled",
+      "selector": "button[class*=\"slot\"][disabled], button[class*=\"slot\"][aria-disabled=\"true\"]",
+      "category": "calendar-time-slot",
+      "purpose": "Disabled time slot — past, booked-out, or unavailable.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-timezone-selector",
+      "selector": "[class*=\"timezone\"] select, select[class*=\"timezone\"], [class*=\"timezone-picker\"]",
+      "category": "calendar-timezone",
+      "purpose": "Timezone dropdown that lets visitors switch the displayed slot times.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
+    },
+    {
+      "id": "calendar-confirm-button",
+      "selector": "button[type=\"submit\"], button[class*=\"confirm\"], button[class*=\"book\"], button[class*=\"continue\"], button[class*=\"next-btn\"], .ghl-btn, .ghl-submit-btn",
+      "category": "calendar-cta",
+      "purpose": "Confirm / book / continue button that advances the calendar through its steps. Inferred from form-widget naming convention.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "button[type=\"submit\"] is the safest single fallback."
+    },
+    {
+      "id": "calendar-form-step-reuse",
+      "selector": "form#_builder-form, .form-field-wrapper, .ghl-question, input[data-q=\"<field_key>\"], .ghl-btn.ghl-submit-btn",
+      "category": "calendar-form-step",
+      "purpose": "The calendar's form-step screen (where visitor enters name/email/phone before confirming) reuses the form widget DOM. All standard form selectors apply on that step.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": "Means you can paste your form CSS rules into the calendar Custom CSS and they'll style the form step automatically."
+    },
+    {
+      "id": "calendar-confirmation-screen",
+      "selector": "[class*=\"confirmation\"], [class*=\"thank-you\"], [class*=\"success\"], [class*=\"booked\"]",
+      "category": "calendar-confirmation",
+      "purpose": "Post-booking confirmation screen with the 'You're booked for...' message.",
+      "confidence": "inferred",
+      "sources": ["erobrien-mwcv3-calendar"],
+      "notes": null
     }
   ],
   "anti_patterns": [
@@ -392,6 +568,16 @@
       "pattern": "Box-shadow on the form card when html/body is painted with the same card colour",
       "why_to_avoid": "If you paint the iframe's html/body with --rs-card-bg to hide the default white iframe-body leak (a common technique), any box-shadow on the <form> projects onto an identical-colour surface — and reads as a visible darker stripe directly below the card. Particularly bad in dark mode where shadow alphas are 4-5× heavier than light mode. Light mode often looks fine and disguises the bug.",
       "use_instead": "Drop box-shadow on the form card entirely. The 1 px border + border-radius define the card edge without needing a shadow. Or, if you want shadow, paint html/body with --bg-sunken (page section colour) instead so the shadow has a contrasting surface to land on."
+    },
+    {
+      "pattern": "CALENDAR — Targeting exact class names instead of substring + ARIA",
+      "why_to_avoid": "GHL renames calendar classes between releases more aggressively than form classes. Exact-match selectors like `.day-cell` or `.time-slot-button` break the moment GHL ships a new version. erobrien's reference file explicitly flags this and uses substring matching throughout.",
+      "use_instead": "Always pair substring class matching with ARIA fallbacks: `[class*=\"day-cell\"][aria-pressed=\"true\"]`. The ARIA attribute is semantic and survives DOM refactors; the substring class match handles cases where ARIA isn't applied."
+    },
+    {
+      "pattern": "CALENDAR — Hitting weekday-header cells with the date-tile rule",
+      "why_to_avoid": "Naive selectors like `button[class*=\"day\"]` match BOTH the date tiles AND the Mon/Tue/Wed column headers, because both have 'day' in their class name. The header styling then gets stomped by the date-tile styling.",
+      "use_instead": "Add a :not() guard: `button[class*=\"day\"]:not([class*=\"weekday\"]):not([class*=\"day-name\"])`. Style the column headers in a separate, earlier rule so the date-tile rule doesn't fight it."
     }
   ]
 }
