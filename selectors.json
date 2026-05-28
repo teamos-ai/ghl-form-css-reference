@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "name": "ghl-form-css-reference",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "last_updated": "2026-05-28",
   "scope": "GoHighLevel / HighLevel / LeadConnector inline form embeds served via form_embed.js. Selectors apply inside the rendered iframe document. Survey forms have additional selectors marked accordingly.",
   "stability_warning": "There is no official CSS-class API from HighLevel. Their own help doc punts to DevTools. The DOM is known to change between platform releases — every snapshot is point-in-time. The `data-q` attribute is the single most stable hook because it mirrors the field's internal name set in the form builder; it survives most refactors that break class-name or :nth-child selectors.",
@@ -387,6 +387,11 @@
       "pattern": "Forgetting vendor-prefixed placeholder selectors",
       "why_to_avoid": "If you hijack --primary at :root (to override the theme button colour), placeholders inherit it via GHL's `color: var(--primary)` rule on ::placeholder. Without vendor-prefixed overrides (-webkit, -moz, -ms), placeholders render in your brand colour and stop reading as helper text.",
       "use_instead": "Set all five: ::placeholder, ::-webkit-input-placeholder, ::-moz-placeholder, :-ms-input-placeholder, ::-ms-input-placeholder. Also -webkit-text-fill-color for webkit edge cases."
+    },
+    {
+      "pattern": "Box-shadow on the form card when html/body is painted with the same card colour",
+      "why_to_avoid": "If you paint the iframe's html/body with --rs-card-bg to hide the default white iframe-body leak (a common technique), any box-shadow on the <form> projects onto an identical-colour surface — and reads as a visible darker stripe directly below the card. Particularly bad in dark mode where shadow alphas are 4-5× heavier than light mode. Light mode often looks fine and disguises the bug.",
+      "use_instead": "Drop box-shadow on the form card entirely. The 1 px border + border-radius define the card edge without needing a shadow. Or, if you want shadow, paint html/body with --bg-sunken (page section colour) instead so the shadow has a contrasting surface to land on."
     }
   ]
 }
